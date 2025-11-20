@@ -1,0 +1,61 @@
+# Xcode
+##
+build/
+DerivedData/
+*.hmap
+*.ipa
+*.xcuserstate
+
+# Xcode workspace user data
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# SwiftPM
+##
+.swiftpm/
+.build/
+
+# CocoaPods
+##
+Pods/
+Podfile.lock
+podfile.lock
+
+# Carthage
+##
+Carthage/Build/
+
+# Fastlane
+##
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Archives
+#
+*.xcarchive
+
+# iOS specific
+#
+*.dSYM.zip
+*.dSYM
+
+# Temp, cache, OS junk
+##
+.DS_Store
+*.swp
+*.tmp
+*~
+
+# Bundler
+vendor/
+
+# SPM Artifacts (Xcode 15+)
+Artifacts/
+
+# App signing
+*.mobileprovision
+*.provisionprofile
+*.xcodeswiftinterface
