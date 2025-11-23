@@ -9,7 +9,7 @@ import SwiftUI
 import CoreData
 
 @main
-struct Po_ke_monApp: App {
+struct PokemonApp: App {
     let persistenceController = PersistenceController.shared
 
     var body: some Scene {
