@@ -25,10 +25,7 @@ struct ContentView: View {
                             Text("Pokemon name:\(pName)")
                         }
                     } label: {
-                        if let pName = pokemon.name {
-                            Text("Pokemon name:\(pName)")
-                        }
-                      
+                        Text("Pokemon name: \(pokemon.name ?? "Unknown")")
                     }
                 }
                

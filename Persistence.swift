@@ -30,15 +30,12 @@ struct PersistenceController {
         newPokemon.speed = 45
         newPokemon.sprite = URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png")
         newPokemon.shinny = URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png")
-        print("NEW POKEMON\(newPokemon)")
               
         do {
             try viewContext.save()
-            print("SAVED\(newPokemon)")
         } catch {
             let nsError = error as NSError
             print(nsError.localizedDescription)
-            print("ERROR\(error)")
         }
         return result
     }()
@@ -47,7 +44,6 @@ struct PersistenceController {
     let container: NSPersistentContainer
 
     init(inMemory: Bool = false) {
-        print("INI`T")
         container = NSPersistentContainer(name: "Dex")
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
