@@ -19,6 +19,8 @@ struct MainView: View {
     private var pokemonResult
    
     @State private var searchText: String = ""
+    @State private var filterByFavorite: Bool = false
+    
     private var dynamicSearchPredicate: NSPredicate {
         var predicates: [NSPredicate] = []
         //Search predicate
@@ -28,6 +30,9 @@ struct MainView: View {
         }
         
         //Filter predicates
+        if filterByFavorite {
+            predicates.append(NSPredicate(format: "favorite = %d", true))
+        }
         
         //Combine predicates
         return NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
@@ -68,6 +73,11 @@ struct MainView: View {
                                         )
                                         .clipShape(.capsule)
                                 }
+                                
+                                if(pokemon.favorite) {
+                                    Image(systemName: "star.fill")
+                                        .foregroundColor(.yellow)
+                                }
                             }
                         }
                     }
@@ -86,9 +96,16 @@ struct MainView: View {
             .onChange(of: searchText) {
                 pokemonResult.nsPredicate = dynamicSearchPredicate
             }
+            .onChange(of: filterByFavorite){
+                pokemonResult.nsPredicate = dynamicSearchPredicate
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                    Button {
+                       filterByFavorite.toggle()
+                    } label: {
+                        Label("Filter by favorites", systemImage: filterByFavorite ? "star.fill" : "star")
+                    }.tint(.yellow)
                 }
                 ToolbarItem {
                     Button {
