@@ -9,13 +9,30 @@ import SwiftUI
 import CoreData
 
 struct MainView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Pokemon.id, ascending: true)],
-        animation: .default)
-    private var pokemonResult: FetchedResults<Pokemon>
     private let fetchService = FetchService()
+    
+    @Environment(\.managedObjectContext) private var viewContext
+    @FetchRequest<Pokemon>(
+        sortDescriptors: [SortDescriptor(\.pokemonId)],
+        animation: .default
+    )
+    private var pokemonResult
+   
+    @State private var searchText: String = ""
+    private var dynamicSearchPredicate: NSPredicate {
+        var predicates: [NSPredicate] = []
+        //Search predicate
+        if !searchText.isEmpty{
+            predicates
+                .append(NSPredicate(format: "name CONTAINS[c] %@", searchText))
+        }
+        
+        //Filter predicates
+        
+        //Combine predicates
+        return NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+    }
+    
 
     var body: some View {
         NavigationStack {
@@ -36,14 +53,19 @@ struct MainView: View {
                                 .fontWeight(.bold)
                             
                             HStack() {
-                                ForEach(pokemon.types ?? [], id: \.self){ type in
+                                ForEach(
+                                    pokemon.types ?? [],
+                                    id: \.self
+                                ){ type in
                                     Text(type.description.capitalized)
                                         .font(.subheadline)
                                         .fontWeight(.semibold)
                                         .foregroundStyle(.black)
                                         .padding(.horizontal, 13)
                                         .padding(.vertical, 5)
-                                        .background(Color(type.description.capitalized))
+                                        .background(
+                                            Color(type.description.capitalized)
+                                        )
                                         .clipShape(.capsule)
                                 }
                             }
@@ -51,9 +73,18 @@ struct MainView: View {
                     }
                 }
             }
+            
             .navigationTitle(Text("Po-ke-mon"))
             .navigationDestination(for: Pokemon.self) { pokemon in
                 Text("Pokemon detail name:\(pokemon.name ?? "Unknown")")
+            }
+            .searchable(
+                text: $searchText,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Find a Pokemon")
+            .autocorrectionDisabled(true)
+            .onChange(of: searchText) {
+                pokemonResult.nsPredicate = dynamicSearchPredicate
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -61,7 +92,7 @@ struct MainView: View {
                 }
                 ToolbarItem {
                     Button {
-                       fetchPokemon()
+                        fetchPokemon()
                     } label: {
                         Label("Add Item", systemImage: "plus")
                     }
@@ -77,7 +108,7 @@ struct MainView: View {
                     let fetchedPokemon = try await fetchService.fetchPokemon(id)
                     
                     let pokemon = Pokemon(context: viewContext)
-                    pokemon.id = fetchedPokemon.id
+                    pokemon.pokemonId = fetchedPokemon.id
                     pokemon.name = fetchedPokemon.name
                     pokemon.types = fetchedPokemon.types
                     pokemon.hp = fetchedPokemon.hp
@@ -99,5 +130,9 @@ struct MainView: View {
 }
 
 #Preview {
-    MainView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    MainView()
+        .environment(
+            \.managedObjectContext,
+             PersistenceController.preview.container.viewContext
+        )
 }

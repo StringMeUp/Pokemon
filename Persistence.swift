@@ -20,7 +20,7 @@ struct PersistenceController {
    
         let newPokemon = Pokemon(context: viewContext)
         newPokemon.name = "bulbasaur"
-        newPokemon.id = 1
+        newPokemon.pokemonId = 1
         newPokemon.types = ["Grass", "Poison"]
         newPokemon.hp = 45
         newPokemon.attack = 49

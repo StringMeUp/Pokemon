@@ -5,8 +5,8 @@
         <attribute name="defense" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="favorite" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="hp" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="id" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String"/>
+        <attribute name="pokemonId" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="shiny" attributeType="URI"/>
         <attribute name="specialAttack" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="specialDefense" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
@@ -15,7 +15,7 @@
         <attribute name="types" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData" customClassName="[String]"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
-                <constraint value="id"/>
+                <constraint value="pokemonId"/>
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
