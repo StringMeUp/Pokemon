@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  MainView.swift
 //  Po-ke-mon
 //
 //  Created by Samir Ramic on 20.11.25.
@@ -8,11 +8,11 @@
 import SwiftUI
 import CoreData
 
-struct ContentView: View {
+struct MainView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Pokemon.attack, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Pokemon.id, ascending: true)],
         animation: .default)
     private var pokemonResult: FetchedResults<Pokemon>
     private let fetchService = FetchService()
@@ -21,15 +21,39 @@ struct ContentView: View {
         NavigationStack {
             List {
                 ForEach(pokemonResult) { pokemon in
-                    NavigationLink {
-                        if let pName = pokemon.name {
-                            Text("Pokemon name:\(pName)")
+                    NavigationLink(value: pokemon) {
+                        AsyncImage(url: pokemon.sprite){ image in
+                            image.resizable()
+                                .scaledToFit()
+                        } placeholder: {
+                            ProgressView()
                         }
-                    } label: {
-                        Text("Pokemon name: \(pokemon.name ?? "Unknown")")
+                        .frame(width: 100, height: 100)
+                        
+                        VStack(alignment: .leading) {
+                            Text(pokemon.name?.capitalized ?? "Unknown")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                            
+                            HStack() {
+                                ForEach(pokemon.types ?? [], id: \.self){ type in
+                                    Text(type.description.capitalized)
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(.black)
+                                        .padding(.horizontal, 13)
+                                        .padding(.vertical, 5)
+                                        .background(Color(type.description.capitalized))
+                                        .clipShape(.capsule)
+                                }
+                            }
+                        }
                     }
                 }
-               
+            }
+            .navigationTitle(Text("Po-ke-mon"))
+            .navigationDestination(for: Pokemon.self) { pokemon in
+                Text("Pokemon detail name:\(pokemon.name ?? "Unknown")")
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -75,5 +99,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    MainView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
