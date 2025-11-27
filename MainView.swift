@@ -72,7 +72,7 @@ struct MainView: View {
                                             Color(type.description.capitalized)
                                         )
                                         .clipShape(.capsule)
-                                }
+                                }.padding(.vertical)
                                 
                                 if(pokemon.favorite) {
                                     Image(systemName: "star.fill")
@@ -107,18 +107,13 @@ struct MainView: View {
                         Label("Filter by favorites", systemImage: filterByFavorite ? "star.fill" : "star")
                     }.tint(.yellow)
                 }
-                ToolbarItem {
-                    Button {
-                        fetchPokemon()
-                    } label: {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
             }
+        }.task {
+            getPokemon()
         }
     }
     
-    private func fetchPokemon(){
+    private func getPokemon(){
         Task {
             do {
                 for id in 1..<152{
