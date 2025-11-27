@@ -16,6 +16,12 @@ struct MainView: View {
         sortDescriptors: [SortDescriptor(\.pokemonId)],
         animation: .default
     )
+    private var allPokemon
+    
+    @FetchRequest<Pokemon>(
+        sortDescriptors: [SortDescriptor(\.pokemonId)],
+        animation: .default
+    )
     private var pokemonResult
    
     @State private var searchText: String = ""
@@ -40,7 +46,7 @@ struct MainView: View {
     
 
     var body: some View {
-        if pokemonResult.isEmpty {
+        if allPokemon.isEmpty {
             ContentUnavailableView {
                 Label("No data", image: .nopokemon)
             } description: {
@@ -101,7 +107,7 @@ struct MainView: View {
                             }
                         }
                     } footer: {
-                        if pokemonResult.count < 151 {
+                        if allPokemon.count < 151 {
                             ContentUnavailableView {
                                 Label("Missing Pokemon", image: .nopokemon)
                             } description: {
@@ -115,7 +121,6 @@ struct MainView: View {
                                 }
                                 .buttonStyle(.borderedProminent)
                             }
-
                         }
                     }
                 }
