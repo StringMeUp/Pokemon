@@ -104,6 +104,17 @@ struct MainView: View {
                                         }
                                     }
                                 }
+                            }.swipeActions {
+                                Button(pokemon.favorite ? "Remove from favorites" : "Add to favorites", systemImage: "star"){
+                                    
+                                    pokemon.favorite.toggle()
+                                    
+                                    do {
+                                       try viewContext.save()
+                                    } catch {
+                                        print(error)
+                                    }
+                                }.tint(pokemon.favorite ? .gray : .yellow)
                             }
                         }
                     } footer: {
