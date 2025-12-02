@@ -137,7 +137,7 @@ struct MainView: View {
                 }
                 .navigationTitle(Text("Po-ke-mon"))
                 .navigationDestination(for: Pokemon.self) { pokemon in
-                    Text("Pokemon detail name:\(pokemon.name ?? "Unknown")")
+                    PokemonDetail().environmentObject(pokemon)
                 }
                 .searchable(
                     text: $searchText,
@@ -169,7 +169,7 @@ struct MainView: View {
     private func getPokemon(from id: Int){
         Task {
             do {
-                for i in id..<152{
+                for i in id..<152 {
                     let fetchedPokemon = try await fetchService.fetchPokemon(i)
                     
                     let pokemon = Pokemon(context: viewContext)
