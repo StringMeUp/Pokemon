@@ -32,12 +32,12 @@ extension Pokemon {
     
     var stats: [Stat] {
         [
-            Stat(id: 1, type: "HP", value: hp),
-            Stat(id: 2, type: "Attack", value: attack),
-            Stat(id: 3, type: "Defense", value: defense),
-            Stat(id: 4, type: "Special Attack", value: specialAttack),
-            Stat(id: 5, type: "Special Defense", value: specialDefense),
-            Stat(id: 6, type: "Speed", value: speed)
+            Stat(id: 1, name: "HP", value: hp),
+            Stat(id: 2, name: "Attack", value: attack),
+            Stat(id: 3, name: "Defense", value: defense),
+            Stat(id: 4, name: "Special Attack", value: specialAttack),
+            Stat(id: 5, name: "Special Defense", value: specialDefense),
+            Stat(id: 6, name: "Speed", value: speed)
         ]
     }
     
@@ -45,9 +45,9 @@ extension Pokemon {
         stats.max { $0.value < $1.value }!
     }
 }
-
+        
 struct Stat: Identifiable {
     let id: Int
-    let type: String
+    let name: String
     let value: Int16
 }

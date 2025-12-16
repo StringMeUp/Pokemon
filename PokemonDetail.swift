@@ -52,8 +52,6 @@ struct PokemonDetail: View {
                             )
                         )
                         .clipShape(.capsule)
-                    
-               
                 }
                 
                 Spacer()
@@ -72,7 +70,16 @@ struct PokemonDetail: View {
                         .tint(.yellow)
                 }
                 
-            }.padding()
+            }.padding([.horizontal, .top])
+            
+            Text("Stats")
+                .foregroundStyle(.primary)
+                .font(.title2)
+                .fontWeight(.medium)
+                .padding(.top)
+            
+            StatsView(pokemon: pokemon)
+            
         }.navigationTitle(pokemon.name?.capitalized ?? "")
     }
 }
