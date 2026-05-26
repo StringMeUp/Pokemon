@@ -26,6 +26,9 @@ struct MainView: View {
    
     @State private var searchText: String = ""
     @State private var filterByFavorite: Bool = false
+    @State private var isFetching: Bool = false
+    @State private var showFetchError = false
+    @State private var fetchErrorMessage = ""
     
     private var dynamicSearchPredicate: NSPredicate {
         var predicates: [NSPredicate] = []
@@ -46,6 +49,7 @@ struct MainView: View {
     
 
     var body: some View {
+        Group {
         if allPokemon.isEmpty {
             ContentUnavailableView {
                 Label("No data", image: .nopokemon)
@@ -164,16 +168,34 @@ struct MainView: View {
                 }
             }
         }
+        }
+        .alert("Fetch failed", isPresented: $showFetchError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(fetchErrorMessage)
+        }
     }
     
     private func getPokemon(from id: Int){
-        Task {
+        Task { @MainActor in
+            guard !isFetching else { return }
+            isFetching = true
             do {
                 for i in id..<152 {
                     let fetchedPokemon = try await fetchService.fetchPokemon(i)
-                    
-                    let pokemon = Pokemon(context: viewContext)
-                    pokemon.pokemonId = fetchedPokemon.id
+                    let fetchRequest: NSFetchRequest<Pokemon> = Pokemon.fetchRequest()
+                    fetchRequest.predicate = NSPredicate(
+                        format: "pokemonId == %d",
+                        fetchedPokemon.id
+                    )
+                    fetchRequest.fetchLimit = 1
+                    let pokemon: Pokemon
+                    if let existing = try viewContext.fetch(fetchRequest).first {
+                        pokemon = existing
+                    } else {
+                        pokemon = Pokemon(context: viewContext)
+                        pokemon.pokemonId = fetchedPokemon.id
+                    }
                     pokemon.name = fetchedPokemon.name
                     pokemon.types = fetchedPokemon.types
                     pokemon.hp = fetchedPokemon.hp
@@ -184,12 +206,18 @@ struct MainView: View {
                     pokemon.speed = fetchedPokemon.speed
                     pokemon.sprite = fetchedPokemon.sprite
                     pokemon.shiny = fetchedPokemon.shiny
-                    
+                }
+                
+                if viewContext.hasChanges {
                     try viewContext.save()
                 }
+                
             } catch {
+                fetchErrorMessage = error.localizedDescription
+                showFetchError = true
                 print("An error occured: \(error)")
             }
+            isFetching = false
         }
     }
 }
