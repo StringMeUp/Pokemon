@@ -70,7 +70,7 @@ struct MainView: View {
                     Section {
                         ForEach(pokemonResult) { pokemon in
                             NavigationLink(value: pokemon) {
-                                AsyncImage(url: pokemon.sprite){ image in
+                                AsyncImage(url: pokemon.spriteURL){ image in
                                     image.resizable()
                                         .scaledToFit()
                                 } placeholder: {
@@ -204,20 +204,47 @@ struct MainView: View {
                     pokemon.specialAttack = fetchedPokemon.specialAttack
                     pokemon.specialDefense = fetchedPokemon.specialDefense
                     pokemon.speed = fetchedPokemon.speed
-                    pokemon.sprite = fetchedPokemon.sprite
-                    pokemon.shiny = fetchedPokemon.shiny
+                    pokemon.spriteURL = fetchedPokemon.spriteURL
+                    pokemon.shinyURL = fetchedPokemon.shinyURL
+                    
                 }
                 
                 if viewContext.hasChanges {
                     try viewContext.save()
                 }
-                
+
+                // Task 1 done — start Task 2 (sprites) only after pokemon data is saved
+                saveSprites()
+
             } catch {
                 fetchErrorMessage = error.localizedDescription
                 showFetchError = true
                 print("An error occured: \(error)")
+                isFetching = false
             }
-            isFetching = false
+        }
+    }
+
+    /// Task 2 — separate from fetch; runs only when Task 1 calls this after a successful save.
+    private func saveSprites() {
+        Task { @MainActor in
+            defer { isFetching = false }
+
+            do {
+                for pokemon in allPokemon {
+                    pokemon.sprite = try await URLSession.shared.data(from: pokemon.spriteURL!).0
+                    pokemon.shiny = try await URLSession.shared.data(from: pokemon.shinyURL!).0
+                    print("Sprites stored \(pokemon.name ?? "")")
+                }
+
+                if viewContext.hasChanges {
+                    try viewContext.save()
+                }
+            } catch {
+                fetchErrorMessage = error.localizedDescription
+                showFetchError = true
+                print("Sprites error: \(error)")
+            }
         }
     }
 }
