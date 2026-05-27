@@ -88,6 +88,25 @@ func pokemonImage(pokemon: Pokemon, showShiny: Bool) -> some View {
             .scaledToFit()
             .shadow(color: .black, radius: 6)
         
+        if pokemon.sprite == nil || pokemon.shiny == nil {
+            AsyncImage(url: showShiny ? pokemon.shinyURL : pokemon.spriteURL) { image in
+                image
+                    .interpolation(.none)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(.top, 50)
+                    .shadow(color: .black, radius: 6)
+            } placeholder: {
+                ProgressView()
+            }
+        }else{
+            (showShiny ? pokemon.sshinnyImage : pokemon.spriteImage)
+                .interpolation(.none)
+                .resizable()
+                .scaledToFit()
+                .padding(.top, 50)
+                .shadow(color: .black, radius: 6)
+        }
         AsyncImage(url: showShiny ? pokemon.shinyURL : pokemon.spriteURL) { image in
             image
                 .interpolation(.none)

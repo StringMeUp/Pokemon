@@ -7,8 +7,27 @@
 
 import Foundation
 import SwiftUI
+import UIKit
 
 extension Pokemon {
+    
+    var spriteImage: Image{
+        if let data = sprite, let image = UIImage(data: data){
+            Image(uiImage: image)
+        }else{
+            Image(.bulbasaur)
+        }
+    }
+    
+    var sshinnyImage: Image{
+        if let data = shiny, let image = UIImage(data: data){
+            Image(uiImage: image)
+        }else{
+            Image(.shinybulbasaur)
+        }
+    }
+    
+    
     var background: ImageResource {
         switch types![0] {
         case "rock", "ground", "steel", "figthing", "ghost", "dark", "psychic":

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 import CoreData
 
 struct MainView: View {
@@ -26,7 +27,7 @@ struct MainView: View {
    
     @State private var searchText: String = ""
     @State private var filterByFavorite: Bool = false
-    @State private var isFetching: Bool = false
+    @State private var isFetching = false
     @State private var showFetchError = false
     @State private var fetchErrorMessage = ""
     
@@ -63,6 +64,7 @@ struct MainView: View {
                     getPokemon(from: 1)
                 }
                 .buttonStyle(.borderedProminent)
+                .disabled(isFetching)
             }
         } else {
             NavigationStack {
@@ -70,13 +72,21 @@ struct MainView: View {
                     Section {
                         ForEach(pokemonResult) { pokemon in
                             NavigationLink(value: pokemon) {
-                                AsyncImage(url: pokemon.spriteURL){ image in
-                                    image.resizable()
+                                if isFetching || pokemon.sprite == nil {
+                                    AsyncImage(url: pokemon.spriteURL) { image in
+                                        image
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 100, height: 100)
+                                    
+                                    } placeholder: {
+                                        ProgressView()
+                                    }
+                                }else{
+                                    pokemon.spriteImage
                                         .scaledToFit()
-                                } placeholder: {
-                                    ProgressView()
+                                        .frame(width: 100, height: 100)
                                 }
-                                .frame(width: 100, height: 100)
                                 
                                 VStack(alignment: .leading) {
                                     Text(pokemon.name?.capitalized ?? "Unknown")
@@ -135,6 +145,7 @@ struct MainView: View {
                                     getPokemon(from: pokemonResult.count + 1)
                                 }
                                 .buttonStyle(.borderedProminent)
+                                .disabled(isFetching)
                             }
                         }
                     }
@@ -176,10 +187,11 @@ struct MainView: View {
         }
     }
     
-    private func getPokemon(from id: Int){
+    private func getPokemon(from id: Int) {
         Task { @MainActor in
-            guard !isFetching else { return }
             isFetching = true
+            defer { isFetching = false }
+
             do {
                 for i in id..<152 {
                     let fetchedPokemon = try await fetchService.fetchPokemon(i)
@@ -206,45 +218,27 @@ struct MainView: View {
                     pokemon.speed = fetchedPokemon.speed
                     pokemon.spriteURL = fetchedPokemon.spriteURL
                     pokemon.shinyURL = fetchedPokemon.shinyURL
-                    
-                }
-                
-                if viewContext.hasChanges {
-                    try viewContext.save()
                 }
 
-                // Task 1 done — start Task 2 (sprites) only after pokemon data is saved
-                saveSprites()
-
+                try viewContext.save()
+                try await saveSprites()
             } catch {
                 fetchErrorMessage = error.localizedDescription
                 showFetchError = true
                 print("An error occured: \(error)")
-                isFetching = false
             }
         }
     }
 
-    /// Task 2 — separate from fetch; runs only when Task 1 calls this after a successful save.
-    private func saveSprites() {
-        Task { @MainActor in
-            defer { isFetching = false }
+    private func saveSprites() async throws {
+        for pokemon in allPokemon {
+            pokemon.sprite = try await URLSession.shared.data(from: pokemon.spriteURL!).0
+            pokemon.shiny = try await URLSession.shared.data(from: pokemon.shinyURL!).0
+            print("Sprites stored \(pokemon.name ?? "")")
+        }
 
-            do {
-                for pokemon in allPokemon {
-                    pokemon.sprite = try await URLSession.shared.data(from: pokemon.spriteURL!).0
-                    pokemon.shiny = try await URLSession.shared.data(from: pokemon.shinyURL!).0
-                    print("Sprites stored \(pokemon.name ?? "")")
-                }
-
-                if viewContext.hasChanges {
-                    try viewContext.save()
-                }
-            } catch {
-                fetchErrorMessage = error.localizedDescription
-                showFetchError = true
-                print("Sprites error: \(error)")
-            }
+        if viewContext.hasChanges {
+            try viewContext.save()
         }
     }
 }
